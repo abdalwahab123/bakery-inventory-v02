@@ -17,8 +17,26 @@ h2{color:#523520;font-size:clamp(19px,3vw,23px);margin-bottom:17px}h3{color:#654
 .quick-note{padding:10px 14px;background:#f7e9d6;border-radius:12px;margin-bottom:12px;color:#65432e}#mAvailable{display:block;margin-top:8px}@media(max-width:700px){#movementForm button{width:100%;font-size:17px}}
 .movement-types,.qty-controls{display:flex;gap:8px;align-items:center}.movement-types button{flex:1;background:#eee2d4;color:#63432c}.movement-types button.selected{background:#557754;color:white}.movement-types #typeOut.selected{background:#a74c40;color:white}.qty-controls input{flex:1;min-width:0;text-align:center;font-size:19px}.qty-controls button{flex:0 0 48px;font-size:20px}#movementSubmit{width:100%;font-size:18px;margin-top:8px}#mPreview{display:block;margin-top:8px}
 </style></head><body>
-<div id="authLayer"><div class="panel"><h2>🥖 مخزون المخبز</h2><p class="muted">النسخة السحابية — تسجيل الدخول بالبريد الإلكتروني المسجل في Firebase</p><div id="setupForm" class="hidden"><h3>إنشاء حساب المدير لأول مرة</h3><label>اسم المدير</label><input id="setupName" placeholder="اسم المدير"><label>كلمة مرور المدير (6 أحرف على الأقل)</label><input id="setupPass" type="password" dir="ltr"><br><br><button onclick="setupAdmin()">إنشاء الحساب</button></div><div id="loginForm" class="hidden"><label>البريد الإلكتروني</label><input id="loginName" type="email" dir="ltr" autocomplete="username"><label>كلمة المرور</label><input id="loginPass" type="password" dir="ltr" autocomplete="current-password"><br><br><button onclick="login()">دخول</button></div><p id="authError" class="low"></p></div></div>
-<header><div><h1>🥖 إدارة مخزون المخبز</h1><small>مخزون موحد — مزامنة مباشرة عبر Firebase</small></div><div class="actions"><span id="who"></span><button class="secondary" onclick="logout()">خروج</button></div></header>
+<div id="authLayer"><div class="panel"><h2>🥖 مخزون باب الاغا</h2><p class="muted">النسخة السحابية — تسجيل الدخول بالبريد الإلكتروني المسجل في Firebase</p><div id="setupForm" class="hidden"><h3>إنشاء حساب المدير لأول مرة</h3><label>اسم المدير</label><input id="setupName" placeholder="اسم المدير"><label>كلمة مرور المدير (6 أحرف على الأقل)</label><input id="setupPass" type="password" dir="ltr"><br><br><button onclick="setupAdmin()">إنشاء الحساب</button></div><div id="loginForm" class="hidden"><label>البريد الإلكتروني</label><input id="loginName" type="email" dir="ltr" autocomplete="username"><label>كلمة المرور</label><input id="loginPass" type="password" dir="ltr" autocomplete="current-password"><br><br><button onclick="login()">دخول</button></div><p id="authError" class="low"></p></div></div>
+
+<div class="logo-container">
+  <img src="logo.jpg" alt="شعار باب الآغا">
+</div>
+
+<style>
+.logo-container {
+  text-align: center;
+  padding: 12px;
+}
+
+.logo-container img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+</style>
+
 <main class="wrap"><nav id="nav"><button data-page="dashboard" class="active">الرئيسية</button><button data-page="products">المنتجات</button><button data-page="movements">الحركات</button><button data-page="prepare">قائمة التحضير</button><button data-page="reports">التقارير</button><button data-page="users">المستخدمون</button><button data-page="backup">النسخ الاحتياطي</button></nav>
 <section id="dashboard" class="active"><div class="grid"><div class="stat">عدد المنتجات<b id="sProducts">0</b></div><div class="stat">إجمالي الكميات<b id="sQty">0</b></div><div class="stat">منتجات عند الحد الأدنى<b id="sLow">0</b></div><div class="stat">حركات اليوم<b id="sToday">0</b></div></div><div class="panel" style="margin-top:15px"><h2>تنبيهات المخزون</h2><div id="lowList"></div></div></section>
 <section id="products"><div class="panel" id="productEditor"><h2>إضافة / تعديل منتج</h2><form id="productForm"><input type="hidden" id="pId"><div class="grid"><div><label>اسم المنتج *</label><input id="pName" required></div><div><label>التصنيف</label><input id="pCat" placeholder="معجنات، مواد أولية..."></div><div><label>الوحدة</label><input id="pUnit" placeholder="قطعة / كغم / كيس" value="قطعة"></div><div><label>الكمية الأولية (للمنتج الجديد)</label><input id="pQty" type="number" min="0" step="any" value="0"></div><div><label>الحد الأدنى للتنبيه</label><input id="pMin" type="number" min="0" step="any" value="0"></div></div><div class="actions"><button type="submit">حفظ المنتج</button><button type="button" class="secondary" onclick="resetProduct()">تفريغ</button></div></form></div><div class="panel"><div class="actions"><h2 style="margin:0;flex:1">قائمة المنتجات</h2><input id="productSearch" placeholder="بحث باسم المنتج أو التصنيف" style="max-width:270px" oninput="renderProducts()"></div><div class="table-wrap"><table><thead><tr><th>المنتج</th><th>التصنيف</th><th>الوحدة</th><th>الكمية</th><th>الحد الأدنى</th><th>إجراءات</th></tr></thead><tbody id="productRows"></tbody></table></div></div></section>
@@ -130,4 +148,29 @@ unsubs.push(db.collection('movements').onSnapshot(s=>{state.movements=s.docs.map
 auth.onAuthStateChanged(async user=>{unsubs.forEach(f=>f());unsubs=[];current=null;if(!user){authInit();return}
 try{const member=await db.collection('members').doc(user.uid).get();if(!member.exists||member.data().active!==true)throw Error('الحساب غير مفعل في members');const role=member.data().role;if(!['admin','worker','viewer'].includes(role))throw Error('صلاحية الحساب غير معروفة');current={id:user.uid,name:user.email,role};$('authLayer').style.display='none';$('authError').textContent='';$('loginPass').value='';startListeners();render()}
 catch(e){$('authError').textContent='تعذر الدخول: '+e.message;await auth.signOut()}});
-</script></body></html>
+</script>
+
+<footer class="footer">
+  <p>© 2026 جميع الحقوق محفوظة</p>
+  <p>نظام إدارة مخزون باب الاغا | Version 2.0.1</p>
+  <p>Designed & Developed by Abdulwahab Kareem</p>
+</footer>
+
+<style>
+.footer {
+  background: #1e293b;
+  color: #ffffff;
+  text-align: center;
+  padding: 18px 10px;
+  margin-top: 30px;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.8;
+  border-radius: 8px;
+}
+
+.footer p {
+  margin: 4px 0;
+}
+</style>
+</body></html>
