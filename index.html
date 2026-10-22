@@ -19,23 +19,9 @@ h2{color:#523520;font-size:clamp(19px,3vw,23px);margin-bottom:17px}h3{color:#654
 </style></head><body>
 <div id="authLayer"><div class="panel"><h2>🥖 مخزون باب الاغا</h2><p class="muted">النسخة السحابية — تسجيل الدخول بالبريد الإلكتروني المسجل في Firebase</p><div id="setupForm" class="hidden"><h3>إنشاء حساب المدير لأول مرة</h3><label>اسم المدير</label><input id="setupName" placeholder="اسم المدير"><label>كلمة مرور المدير (6 أحرف على الأقل)</label><input id="setupPass" type="password" dir="ltr"><br><br><button onclick="setupAdmin()">إنشاء الحساب</button></div><div id="loginForm" class="hidden"><label>البريد الإلكتروني</label><input id="loginName" type="email" dir="ltr" autocomplete="username"><label>كلمة المرور</label><input id="loginPass" type="password" dir="ltr" autocomplete="current-password"><br><br><button onclick="login()">دخول</button></div><p id="authError" class="low"></p></div></div>
 
-<div class="logo-container">
-  <img src="logo.jpg" alt="شعار باب الآغا">
-</div>
+<header><div><h1>🥖 مخزون باب الآغا</h1><small>إدارة المخزون السحابي</small></div><div class="actions"><span id="who"></span><button type="button" class="secondary" onclick="logout()">تسجيل الخروج</button></div></header>
 
-<style>
-.logo-container {
-  text-align: center;
-  padding: 12px;
-}
 
-.logo-container img {
-  width: 90px;
-  height: 90px;
-  object-fit: contain;
-  border-radius: 50%;
-}
-</style>
 
 <main class="wrap"><nav id="nav"><button data-page="dashboard" class="active">الرئيسية</button><button data-page="products">المنتجات</button><button data-page="movements">الحركات</button><button data-page="prepare">قائمة التحضير</button><button data-page="reports">التقارير</button><button data-page="users">المستخدمون</button><button data-page="backup">النسخ الاحتياطي</button></nav>
 <section id="dashboard" class="active"><div class="grid"><div class="stat">عدد المنتجات<b id="sProducts">0</b></div><div class="stat">إجمالي الكميات<b id="sQty">0</b></div><div class="stat">منتجات عند الحد الأدنى<b id="sLow">0</b></div><div class="stat">حركات اليوم<b id="sToday">0</b></div></div><div class="panel" style="margin-top:15px"><h2>تنبيهات المخزون</h2><div id="lowList"></div></div></section>
