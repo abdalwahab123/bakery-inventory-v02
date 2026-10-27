@@ -16,6 +16,7 @@ h2{color:#523520;font-size:clamp(19px,3vw,23px);margin-bottom:17px}h3{color:#654
 @media print{body{background:#fff!important;color:#000!important}#printArea{background:#fff!important;color:#000!important}#printArea th{background:#eee!important;color:#000!important}#printArea table{width:100%}}
 .quick-note{padding:10px 14px;background:#f7e9d6;border-radius:12px;margin-bottom:12px;color:#65432e}#mAvailable{display:block;margin-top:8px}@media(max-width:700px){#movementForm button{width:100%;font-size:17px}}
 .movement-types,.qty-controls{display:flex;gap:8px;align-items:center}.movement-types button{flex:1;background:#eee2d4;color:#63432c}.movement-types button.selected{background:#557754;color:white}.movement-types #typeOut.selected{background:#a74c40;color:white}.qty-controls input{flex:1;min-width:0;text-align:center;font-size:19px}.qty-controls button{flex:0 0 48px;font-size:20px}#movementSubmit{width:100%;font-size:18px;margin-top:8px}#mPreview{display:block;margin-top:8px}
+ .prepare-category td{background:#eadac3!important;color:#563723;font-weight:bold;border-top:2px solid #d1b28b;padding:11px 12px}
 </style></head><body>
 <div id="authLayer"><div class="panel"><h2>🥖 مخزون باب الاغا</h2><p class="muted">النسخة السحابية — تسجيل الدخول بالبريد الإلكتروني المسجل في Firebase</p><div id="setupForm" class="hidden"><h3>إنشاء حساب المدير لأول مرة</h3><label>اسم المدير</label><input id="setupName" placeholder="اسم المدير"><label>كلمة مرور المدير (6 أحرف على الأقل)</label><input id="setupPass" type="password" dir="ltr"><br><br><button onclick="setupAdmin()">إنشاء الحساب</button></div><div id="loginForm" class="hidden"><label>البريد الإلكتروني</label><input id="loginName" type="email" dir="ltr" autocomplete="username"><label>كلمة المرور</label><input id="loginPass" type="password" dir="ltr" autocomplete="current-password"><br><br><button onclick="login()">دخول</button></div><p id="authError" class="low"></p></div></div>
 
@@ -27,10 +28,10 @@ h2{color:#523520;font-size:clamp(19px,3vw,23px);margin-bottom:17px}h3{color:#654
 <section id="dashboard" class="active"><div class="grid"><div class="stat">عدد المنتجات<b id="sProducts">0</b></div><div class="stat">إجمالي الكميات<b id="sQty">0</b></div><div class="stat">منتجات عند الحد الأدنى<b id="sLow">0</b></div><div class="stat">حركات اليوم<b id="sToday">0</b></div></div><div class="panel" style="margin-top:15px"><h2>تنبيهات المخزون</h2><div id="lowList"></div></div></section>
 <section id="products"><div class="panel" id="productEditor"><h2>إضافة / تعديل منتج</h2><form id="productForm"><input type="hidden" id="pId"><div class="grid"><div><label>اسم المنتج *</label><input id="pName" required></div><div><label>التصنيف</label><input id="pCat" placeholder="معجنات، مواد أولية..."></div><div><label>الوحدة</label><input id="pUnit" placeholder="قطعة / كغم / كيس" value="قطعة"></div><div><label>الكمية الأولية (للمنتج الجديد)</label><input id="pQty" type="number" min="0" step="any" value="0"></div><div><label>الحد الأدنى للتنبيه</label><input id="pMin" type="number" min="0" step="any" value="0"></div></div><div class="actions"><button type="submit">حفظ المنتج</button><button type="button" class="secondary" onclick="resetProduct()">تفريغ</button></div></form></div><div class="panel"><div class="actions"><h2 style="margin:0;flex:1">قائمة المنتجات</h2><input id="productSearch" placeholder="بحث باسم المنتج أو التصنيف" style="max-width:270px" oninput="renderProducts()"></div><div class="table-wrap"><table><thead><tr><th>المنتج</th><th>التصنيف</th><th>الوحدة</th><th>الكمية</th><th>الحد الأدنى</th><th>إجراءات</th></tr></thead><tbody id="productRows"></tbody></table></div></div></section>
 <section id="movements"><div class="panel"><h2>تسجيل إدخال / إخراج</h2><p class="quick-note">ابحث عن المنتج، اختَر إضافة أو سحب، ثم أدخل الكمية. يتم تحديث الرصيد مباشرة.</p><form id="movementForm"><div class="grid"><div><label>بحث سريع عن المنتج</label><input id="mSearch" placeholder="اكتب اسم المنتج" oninput="filterMovementProducts()"><label>المنتج</label><select id="mProduct" required onchange="showAvailable()"></select><small id="mAvailable" class="muted"></small></div><div><label>نوع الحركة</label><div class="movement-types"><button type="button" id="typeIn" class="selected" onclick="setMovementType('in')">＋ إدخال</button><button type="button" id="typeOut" onclick="setMovementType('out')">− سحب</button></div><input type="hidden" id="mType" value="in"></div><div><label>الكمية</label><div class="qty-controls"><button type="button" class="secondary" onclick="adjustQty(-1)">−</button><input id="mQty" type="number" inputmode="decimal" min="0.001" step="any" placeholder="اكتب الكمية" required><button type="button" class="secondary" onclick="adjustQty(1)">＋</button></div><small id="mPreview" class="muted"></small></div><div><label>ملاحظة</label><input id="mNote" placeholder="اختياري"></div></div><button id="movementSubmit">تأكيد الإدخال</button></form></div><div class="panel"><h2>سجل الحركات</h2><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>المنتج</th><th>النوع</th><th>الكمية</th><th>المستخدم</th><th>ملاحظة</th></tr></thead><tbody id="movementRows"></tbody></table></div></div></section>
-<section id="prepare"><div class="panel"><h2>قائمة التحضير</h2><p class="muted">المواد مقسمة حسب تصنيف المنتج إلى مواد أولية وباقي السلع. الكمية الافتراضية صفر، ولا تُطبع إلا المواد ذات الكمية الأكبر من صفر. تبقى الكميات محفوظة على هذا الجهاز.</p><div class="grid"><div><label>اسم القائمة / الجهة</label><input id="orderTitle" placeholder="تحضير الصباح"></div><div><label>بحث عن مادة</label><input id="orderSearch" placeholder="ابحث باسم المنتج أو التصنيف" oninput="renderOrder()" autocomplete="off"></div></div><p id="orderCount" class="muted"></p><h3>المواد الأولية</h3><div class="table-wrap"><table style="min-width:420px"><thead><tr><th>المادة</th><th>الكمية المطلوبة</th><th>الوحدة</th></tr></thead><tbody id="orderRawRows"></tbody></table></div><br><div class="actions"><button class="green" onclick="printOrder('raw')">طباعة المواد الأولية</button></div><br><h3>باقي السلع</h3><div class="table-wrap"><table style="min-width:420px"><thead><tr><th>السلعة</th><th>الكمية المطلوبة</th><th>الوحدة</th></tr></thead><tbody id="orderOtherRows"></tbody></table></div><br><div class="actions"><button class="green" onclick="printOrder('other')">طباعة باقي السلع</button><button class="secondary" onclick="printOrder('all')">طباعة القائمتين</button><button class="secondary" onclick="clearOrder()">تصفير جميع الكميات</button></div></div></section>
+<section id="prepare"><div class="panel"><h2>قائمة التحضير</h2><p class="muted">المواد الأولية تظهر أولاً، وباقي السلع مجمّعة حسب التصنيف ومرتبة أبجدياً داخل كل تصنيف. الكمية الافتراضية صفر، ولا تُطبع إلا المواد ذات الكمية الأكبر من صفر. تبقى الكميات محفوظة على هذا الجهاز.</p><div class="grid"><div><label>اسم القائمة / الجهة</label><input id="orderTitle" placeholder="تحضير الصباح"></div><div><label>بحث عن مادة</label><input id="orderSearch" placeholder="ابحث باسم المنتج أو التصنيف" oninput="renderOrder()" autocomplete="off"></div></div><p id="orderCount" class="muted"></p><h3>المواد الأولية</h3><div class="table-wrap"><table style="min-width:420px"><thead><tr><th>المادة</th><th>الكمية المطلوبة</th><th>الوحدة</th></tr></thead><tbody id="orderRawRows"></tbody></table></div><br><div class="actions"><button class="green" onclick="printOrder('raw')">طباعة المواد الأولية</button></div><br><h3>باقي السلع — مرتبة حسب التصنيف</h3><div class="table-wrap"><table style="min-width:420px"><thead><tr><th>السلعة</th><th>الكمية المطلوبة</th><th>الوحدة</th></tr></thead><tbody id="orderOtherRows"></tbody></table></div><br><div class="actions"><button class="green" onclick="printOrder('other')">طباعة باقي السلع</button><button class="secondary" onclick="printOrder('all')">طباعة القائمتين</button><button class="secondary" onclick="clearOrder()">تصفير جميع الكميات</button></div></div></section>
 <section id="reports"><div class="panel"><h2>تقرير حركة المخزون</h2><div class="grid"><div><label>من تاريخ</label><input id="rFrom" type="date"></div><div><label>إلى تاريخ</label><input id="rTo" type="date"></div><div><label>نوع الحركة</label><select id="rType"><option value="all">الكل</option><option value="in">إضافة</option><option value="out">سحب</option></select></div></div><br><div class="actions"><button onclick="renderReports()">عرض التقرير</button><button class="secondary" onclick="exportMovementsCSV()">تصدير CSV</button><button class="secondary" onclick="printReport()">طباعة / PDF</button></div><p id="reportSummary"></p><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>المنتج</th><th>النوع</th><th>الكمية</th><th>المستخدم</th></tr></thead><tbody id="reportRows"></tbody></table></div></div></section>
 <section id="users"><div class="panel"><h2>إدارة المستخدمين (Firebase)</h2><div class="warning">إنشاء المستخدمين يتم حالياً من لوحة Firebase Authentication، ثم إضافة مستند مطابق لمعرّف المستخدم داخل members. قواعد Firestore الحالية تسمح للمدير فقط بتعديل المخزون.</div><form id="userForm" style="display:none"><div class="grid"><div><label>اسم المستخدم</label><input id="uName" required></div><div><label>كلمة المرور (6 أحرف على الأقل)</label><input id="uPass" type="password" dir="ltr" required minlength="6"></div><div><label>الصلاحية</label><select id="uRole"><option value="admin">مدير</option><option value="worker">عامل (إضافة وسحب)</option><option value="viewer">مشاهد فقط</option></select></div></div><button>إضافة مستخدم</button></form><div class="table-wrap"><table><thead><tr><th>المستخدم</th><th>الصلاحية</th><th>إجراء</th></tr></thead><tbody id="userRows"></tbody></table></div></div></section>
-<section id="backup"><div class="panel"><h2>نسخة احتياطية للبيانات</h2><p>احفظ ملف JSON على جهازك بشكل دوري، خصوصاً قبل مسح بيانات المتصفح أو تغيير الجهاز.</p><div class="actions"><button onclick="downloadBackup()">تنزيل نسخة احتياطية JSON</button><label class="btn" style="cursor:pointer">استعادة نسخة (غير مفعلة) <input type="file" accept=".json,application/json" style="display:none" disabled></label></div><div class="warning">التنزيل يحفظ نسخة من بيانات السحابة. الاستعادة معطلة في هذه النسخة التجريبية؛ لا تحذف النسخة المحلية القديمة.</div></div></section></main><footer>مخزون المخبز — نسخة Firebase السحابية • 2026</footer><div id="toast"></div><div id="printArea"></div>
+<section id="backup"><div class="panel"><h2>نسخة احتياطية للبيانات</h2><p>احفظ ملف JSON على جهازك بشكل دوري، خصوصاً قبل مسح بيانات المتصفح أو تغيير الجهاز.</p><div class="actions"><button onclick="downloadBackup()">تنزيل نسخة احتياطية JSON</button><label class="btn" style="cursor:pointer">استعادة نسخة (غير مفعلة) <input type="file" accept=".json,application/json" style="display:none" disabled></label></div><div class="warning">التنزيل يحفظ نسخة من بيانات السحابة. الاستعادة معطلة في هذه النسخة التجريبية؛ لا تحذف النسخة المحلية القديمة.</div></div></section></main><div id="toast"></div><div id="printArea"></div>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -128,13 +129,17 @@ function isRawMaterial(p){
  const category=String(p.cat||'').trim().toLocaleLowerCase().replace(/[أإآ]/g,'ا').replace(/\s+/g,' ');
  return category==='مواد اولية'||category==='مادة اولية'||category==='المواد الاولية'||category==='مواد خام'||category==='مواد خامة'||category==='raw materials'||category==='raw material';
 }
+function categoryName(p){return String(p.cat||'').trim()||'غير مصنف'}
+function sortedByCategory(items){return [...items].sort((a,b)=>categoryName(a).localeCompare(categoryName(b),'ar')||a.name.localeCompare(b.name,'ar'))}
 function renderOrder(){
  const q=($('orderSearch')?.value||'').trim().toLocaleLowerCase();
- const products=state.products.filter(p=>(p.name+' '+(p.cat||'')).toLocaleLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+ const products=state.products.filter(p=>(p.name+' '+(p.cat||'')).toLocaleLowerCase().includes(q));
  const row=p=>{const item=order.find(x=>x.id===p.id);const qty=item?Number(item.qty):0;return `<tr><td>${esc(p.name)}</td><td><input type="number" min="0" step="any" inputmode="decimal" aria-label="كمية ${esc(p.name)}" value="${qty}" onchange="updateOrderQty('${p.id}',this.value)" style="min-width:90px;max-width:145px"></td><td>${esc(p.unit)}</td></tr>`};
- for(const [target,items] of [['orderRawRows',products.filter(isRawMaterial)],['orderOtherRows',products.filter(p=>!isRawMaterial(p))]]){
-  const el=$(target);if(el)el.innerHTML=items.map(row).join('')||'<tr><td colspan="3">لا توجد مواد مطابقة</td></tr>';
- }
+ const raw=products.filter(isRawMaterial).sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+ const other=sortedByCategory(products.filter(p=>!isRawMaterial(p)));
+ const groupedRows=items=>{let last='';return items.map(p=>{const cat=categoryName(p);const heading=cat!==last?`<tr class="prepare-category"><td colspan="3">${esc(cat)}</td></tr>`:'';last=cat;return heading+row(p)}).join('')};
+ $('orderRawRows').innerHTML=raw.map(row).join('')||'<tr><td colspan="3">لا توجد مواد مطابقة</td></tr>';
+ $('orderOtherRows').innerHTML=groupedRows(other)||'<tr><td colspan="3">لا توجد مواد مطابقة</td></tr>';
  const count=$('orderCount');if(count)count.textContent='المواد المختارة للطباعة: '+order.length+' من '+state.products.length;
  saveOrder();
 }
@@ -148,10 +153,11 @@ function printable(title,rows,headers){
  w.document.open();w.document.write(html);w.document.close();
 }
 function printOrder(group='all'){
- const selected=order.filter(p=>Number(p.qty)>0&&state.products.some(x=>x.id===p.id&&(group==='all'||(group==='raw'?isRawMaterial(x):!isRawMaterial(x)))));
+ const selected=order.filter(p=>Number(p.qty)>0).map(p=>({product:state.products.find(x=>x.id===p.id),qty:p.qty})).filter(x=>x.product&&(group==='all'||(group==='raw'?isRawMaterial(x.product):!isRawMaterial(x.product))));
  if(!selected.length)return toast('لا توجد كميات أكبر من صفر في هذه القائمة');
+ selected.sort((a,b)=>Number(!isRawMaterial(a.product))-Number(!isRawMaterial(b.product))||categoryName(a.product).localeCompare(categoryName(b.product),'ar')||a.product.name.localeCompare(b.product.name,'ar'));
  const label=group==='raw'?'المواد الأولية':group==='other'?'باقي السلع':'قائمة التحضير';
- printable(($('orderTitle').value.trim()||'قائمة التحضير')+' — '+label,selected.map(p=>[p.name,p.qty,p.unit]),['المنتج','الكمية','الوحدة']);
+ printable(($('orderTitle').value.trim()||'قائمة التحضير')+' — '+label,selected.map(({product,qty})=>[categoryName(product),product.name,qty,product.unit]),['التصنيف','المنتج','الكمية','الوحدة']);
 }
 function filtered(){const f=$('rFrom').value,t=$('rTo').value,ty=$('rType').value;return state.movements.filter(m=>(!f||m.at.slice(0,10)>=f)&&(!t||m.at.slice(0,10)<=t)&&(ty==='all'||m.type===ty))}
 function renderReports(){const rows=filtered();$('reportSummary').textContent=`عدد الحركات: ${rows.length} | مجموع الإضافة: ${rows.filter(x=>x.type==='in').reduce((a,x)=>a+Number(x.qty),0)} | مجموع السحب: ${rows.filter(x=>x.type==='out').reduce((a,x)=>a+Number(x.qty),0)} (بمختلف الوحدات)`;$('reportRows').innerHTML=rows.map(m=>`<tr><td>${fmt(m.at)}</td><td>${esc(m.productName)}</td><td>${m.type==='in'?'إضافة':'سحب'}</td><td>${m.qty}</td><td>${esc(m.by)}</td></tr>`).join('')||'<tr><td colspan="5">لا توجد نتائج</td></tr>'}
@@ -171,21 +177,22 @@ catch(e){$('authError').textContent='تعذر الدخول: '+e.message;await au
 
 <footer class="footer">
   <p>© 2026 جميع الحقوق محفوظة</p>
-  <p>نظام إدارة مخزون باب الاغا | Version 2.0.1</p>
+  <p>نظام إدارة مخزون باب الآغا | Version 2.1.0</p>
   <p>Designed & Developed by Abdulwahab Kareem</p>
 </footer>
 
 <style>
 .footer {
-  background: #1e293b;
-  color: #ffffff;
+  background: linear-gradient(125deg,#3c2518,#68452d);
+  color: #fff8ec;
   text-align: center;
   padding: 18px 10px;
   margin-top: 30px;
   font-family: Arial, sans-serif;
   font-size: 13px;
   line-height: 1.8;
-  border-radius: 8px;
+  border-radius: 12px;
+  border-top: 3px solid #d6a56d;
 }
 
 .footer p {
